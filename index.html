@@ -3,14 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DUOKO · 开屏入口</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- ---------- 预加载 + 智能协议切换 · 域名 duoko.cc.cd ---------- -->
+    <!-- ---------- 微信浏览器检测 · 置顶优先执行 ---------- -->
+    <script>
+        (function() {
+            "use strict";
+            
+            // ----- 微信浏览器精确检测 -----
+            function isWeChatBrowser() {
+                const ua = navigator.userAgent.toLowerCase();
+                // 标准微信检测: 包含micromessenger，排除其他伪装
+                return ua.indexOf('micromessenger') !== -1;
+            }
+            
+            // ----- 如果是微信浏览器：完全阻止加载，显示提示 -----
+            if (isWeChatBrowser()) {
+                // 1. 彻底阻止后续任何内容渲染
+                document.documentElement.style.display = 'none';
+                
+                // 2. 停止所有JS执行（后续代码不再执行）
+                window.stop();
+                
+                // 3. 创建全屏提示层（极简风格，符合DUOKO视觉）
+                const style = document.createElement('style');
+                style.textContent = `
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    body {
+                        background: #000000;
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 100vh;
+                        min-height: 100dvh;
+                        width: 100%;
+                        padding: 24px;
+                    }
+                    .wechat-tip {
+                        max-width: 600px;
+                        width: 100%;
+                        background: linear-gradient(145deg, #0a0f18, #030507);
+                        border: 1px solid rgba(60, 160, 255, 0.3);
+                        border-radius: 32px;
+                        padding: 48px 32px;
+                        text-align: center;
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(80, 200, 255, 0.1), 0 0 30px rgba(0,100,255,0.2);
+                        backdrop-filter: blur(10px);
+                    }
+                    .wechat-tip-icon {
+                        font-size: 48px;
+                        margin-bottom: 24px;
+                        filter: drop-shadow(0 0 20px #3a8aff);
+                    }
+                    .wechat-tip-title {
+                        color: white;
+                        font-size: 28px;
+                        font-weight: 700;
+                        letter-spacing: 2px;
+                        text-transform: uppercase;
+                        margin-bottom: 20px;
+                        text-shadow: 0 0 15px #3a8aff, 0 0 40px #1e4e8a;
+                        background: linear-gradient(45deg, #ffffff, #a0d0ff);
+                        -webkit-background-clip: text;
+                        background-clip: text;
+                        color: transparent;
+                    }
+                    .wechat-tip-text {
+                        color: rgba(200, 230, 255, 0.9);
+                        font-size: 18px;
+                        line-height: 1.7;
+                        margin-bottom: 32px;
+                        font-weight: 350;
+                        letter-spacing: 1px;
+                    }
+                    .wechat-tip-button {
+                        display: inline-block;
+                        padding: 16px 40px;
+                        background: linear-gradient(145deg, #1a2e4a, #0f1a2a);
+                        border: 1.5px solid rgba(80, 200, 255, 0.6);
+                        border-radius: 50px;
+                        color: white;
+                        font-size: 18px;
+                        font-weight: 500;
+                        letter-spacing: 4px;
+                        text-transform: uppercase;
+                        text-decoration: none;
+                        box-shadow: 0 0 20px rgba(0,160,255,0.4);
+                        transition: all 0.3s ease;
+                    }
+                    .wechat-tip-button:hover {
+                        background: linear-gradient(145deg, #23405e, #152433);
+                        border-color: rgba(80, 200, 255, 0.9);
+                        box-shadow: 0 0 35px rgba(0,180,255,0.7);
+                    }
+                    .wechat-tip-browser {
+                        margin-top: 32px;
+                        color: rgba(150, 200, 255, 0.6);
+                        font-size: 15px;
+                        font-weight: 300;
+                        letter-spacing: 2px;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // 4. 构建提示界面
+                document.title = '请在浏览器打开 · DUOKO';
+                
+                const body = document.createElement('body');
+                body.innerHTML = `
+                    <div class="wechat-tip">
+                        <div class="wechat-tip-icon">⚠️</div>
+                        <div class="wechat-tip-title">DUOKO</div>
+                        <div class="wechat-tip-text">
+                            当前在微信内访问<br>
+                            请点击右上角 <span style="display: inline-block; background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 40px; margin: 0 4px;">···</span><br>
+                            选择「在浏览器打开」
+                        </div>
+                        <a href="#" class="wechat-tip-button" onclick="return false;">了解</a>
+                        <div class="wechat-tip-browser">
+                            ── 推荐使用 Safari / Chrome ──
+                        </div>
+                    </div>
+                `;
+                
+                // 5. 替换整个文档内容
+                document.documentElement.innerHTML = '';
+                document.documentElement.appendChild(document.createElement('head'));
+                document.documentElement.appendChild(body);
+                
+                // 6. 停止后续所有操作
+                throw new Error('WeChat browser detected - stopped execution');
+            }
+        })();
+    </script>
+    
+    <!-- ---------- 以下代码仅在非微信浏览器中加载 ---------- -->
     <link rel="dns-prefetch" href="//duoko.cc.cd">
     <link rel="preconnect" href="//duoko.cc.cd">
     <link rel="preconnect" href="https://duoko.cc.cd">
     <link rel="preconnect" href="http://duoko.cc.cd">
+    
+    <title>DUOKO · 开屏入口</title>
     
     <style>
         /* ---------- 全局重置 - 极简模式 ---------- */
@@ -560,7 +697,7 @@
             let hasRedirected = false;
             let clickHandlerAttached = false;
             let autoRedirectTimer = null;
-            let httpsDetected = false; // 新增：是否完成HTTPS探测
+            let httpsDetected = false;
             
             // UI元素
             const statusCorner = document.getElementById('statusCorner');
@@ -586,16 +723,14 @@
                 const isOnline = navigator.onLine;
                 
                 if (isOnline) {
-                    // 使用更可靠的探测地址（Google DNS + Baidu 双保险）
                     const img1 = new Image();
-                    const img2 = new Image();
                     let resolved = false;
                     let successCount = 0;
                     
                     function checkResolve() {
                         if (resolved) return;
                         successCount++;
-                        if (successCount >= 1) { // 只要有一个成功就算联网
+                        if (successCount >= 1) {
                             resolved = true;
                             clearTimeout(timer);
                             callback(true);
@@ -605,23 +740,13 @@
                     const timer = setTimeout(() => {
                         if (!resolved) {
                             resolved = true;
-                            // 超时也认为可能在线，尝试跳转
                             callback(true);
                         }
                     }, 3000);
                     
                     img1.onload = checkResolve;
-                    img1.onerror = function() {
-                        // 错误不代表离线，只是资源不存在，网络可能还是通的
-                        checkResolve();
-                    };
+                    img1.onerror = checkResolve;
                     img1.src = 'https://www.baidu.com/favicon.ico?t=' + Date.now();
-                    
-                    img2.onload = checkResolve;
-                    img2.onerror = function() {
-                        checkResolve();
-                    };
-                    img2.src = 'https://www.google.com/favicon.ico?t=' + Date.now();
                 } else {
                     callback(false);
                 }
@@ -629,7 +754,6 @@
 
             // ----- 探测 HTTPS 可用性（修复版）-----
             function detectHttpsAvailability(callback) {
-                // 使用 fetch 更可靠，且避免被缓存干扰
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 3000);
                 
@@ -641,12 +765,10 @@
                 })
                 .then(() => {
                     clearTimeout(timeoutId);
-                    // no-cors 模式下无法读取状态，但只要能发送请求就说明HTTPS可达
                     callback(true);
                 })
                 .catch(() => {
                     clearTimeout(timeoutId);
-                    // 降级方案：使用Image探测
                     const img = new Image();
                     let imgResolved = false;
                     const imgTimer = setTimeout(() => {
@@ -682,19 +804,16 @@
                 if (hasRedirected) return;
                 hasRedirected = true;
                 
-                // 清除自动跳转定时器
                 if (autoRedirectTimer) {
                     clearTimeout(autoRedirectTimer);
                 }
                 
                 if (isNetworkAvailable) {
-                    // 如果HTTPS探测还未完成，默认使用HTTP（保守策略）
                     const target = finalTargetUrl || HTTP_URL;
                     updateStatus(`↗ REDIRECTING TO ${target}`);
                     window.location.href = target;
                 } else {
                     updateStatus(`✗ NO NETWORK`, true);
-                    // 无网络时提示，不跳转，允许重试
                     setTimeout(() => {
                         hasRedirected = false;
                     }, 1000);
@@ -706,13 +825,11 @@
                 if (clickHandlerAttached) return;
                 clickHandlerAttached = true;
                 
-                // 为整个页面添加点击跳转
                 body.addEventListener('click', function onClick(e) {
                     if (hasRedirected) return;
                     executeRedirect();
                 });
                 
-                // 为点击提示添加点击事件
                 if (clickHint) {
                     clickHint.addEventListener('click', function(e) {
                         e.stopPropagation();
@@ -724,13 +841,9 @@
 
             // ----- 初始化 -----
             function init() {
-                // 初始状态 - 英文
                 updateStatus(`⚡ CONNECTING...`);
-                
-                // 先默认使用HTTP（确保有保底）
                 finalTargetUrl = HTTP_URL;
                 
-                // 检测网络
                 detectNetworkAvailability(function(online) {
                     isNetworkAvailable = online;
                     
@@ -741,7 +854,6 @@
                     
                     updateStatus(`🌐 PROBING HTTPS...`);
                     
-                    // 探测HTTPS（修复版）
                     detectHttpsAvailability(function(httpsOk) {
                         isHttpsAvailable = httpsOk;
                         if (httpsOk) {
@@ -755,9 +867,7 @@
                     });
                 });
                 
-                // 5秒自动跳转（无论探测是否完成，超时就跳转）
                 autoRedirectTimer = setTimeout(() => {
-                    // 如果HTTPS探测还没完成，直接使用HTTP跳转
                     if (!httpsDetected) {
                         finalTargetUrl = HTTP_URL;
                         updateStatus(`⏱️ TIMEOUT · USING HTTP`);
@@ -765,18 +875,16 @@
                     executeRedirect();
                 }, REDIRECT_DELAY);
                 
-                // 附加点击跳转（用户随时可以点击）
                 attachClickHandler();
             }
 
-            // 页面加载执行
             if (document.readyState === 'complete' || document.readyState === 'interactive') {
                 setTimeout(init, 10);
             } else {
                 window.addEventListener('DOMContentLoaded', init);
             }
 
-            // ---------- 粒子特效 - 极致性能优化 ----------
+            // ---------- 粒子特效 ----------
             const canvas = document.getElementById('particle-canvas');
             const ctx = canvas?.getContext('2d');
             
@@ -882,7 +990,6 @@
                 });
             }
 
-            // 确保圆环无限旋转
             if (progressCircle) {
                 progressCircle.style.animation = 'circle-rotate 1.2s linear infinite';
             }
